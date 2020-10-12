@@ -1,0 +1,19 @@
+{
+  "name": "DatasetWithFileRequestorPays",
+  "description": "Create a dataset with a file.",
+  "serverSpecificationFile": "mmdev.json",
+  "billingAccount": "01C5F5-9F88EC-850831",
+  "kubernetes": {},
+  "application": {},
+  "testScripts": [
+    {
+      "name": "CreateDataset",
+      "parameters": ["gs://jade_testbucket_requester_pays/encodetest/file_small.json"],
+      "numberOfUserJourneyThreadsToRun": 1,
+      "userJourneyThreadPoolSize": 1,
+      "expectedTimeForEach": 10,
+      "expectedTimeForEachUnit": "MINUTES"
+    }
+  ],
+  "testUserFiles": ["dumbledore.json"]
+}

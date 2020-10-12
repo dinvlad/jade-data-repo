@@ -1,0 +1,19 @@
+{
+  "name": "DatasetNoFiles",
+  "description": "Create a dataset with no files.",
+  "serverSpecificationFile": "mmdev.json",
+  "billingAccount": "01C5F5-9F88EC-850831",
+  "kubernetes": {},
+  "application": {},
+  "testScripts": [
+    {
+      "name": "CreateDataset",
+      "parameters": [],
+      "numberOfUserJourneyThreadsToRun": 1,
+      "userJourneyThreadPoolSize": 1,
+      "expectedTimeForEach": 10,
+      "expectedTimeForEachUnit": "MINUTES"
+    }
+  ],
+  "testUserFiles": ["dumbledore.json"]
+}
