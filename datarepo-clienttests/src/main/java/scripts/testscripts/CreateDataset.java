@@ -6,13 +6,11 @@ import bio.terra.datarepo.model.BulkLoadArrayRequestModel;
 import bio.terra.datarepo.model.BulkLoadArrayResultModel;
 import bio.terra.datarepo.model.BulkLoadFileModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
-import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.IngestRequestModel;
 import bio.terra.datarepo.model.IngestResponseModel;
 import bio.terra.datarepo.model.JobModel;
 import com.google.cloud.storage.BlobId;
 import common.utils.FileUtils;
-import common.utils.StorageUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -130,29 +128,32 @@ public class CreateDataset extends CreateProfile {
   }
 
   public void cleanup(List<TestUserSpecification> testUsers) throws Exception {
-    // delete the datasets created by the user journey threads
-    for (Map.Entry<DatasetSummaryModel, TestUserSpecification> datasetCreated :
-        datasetsCreated.entrySet()) {
-      // get the ApiClient for the dataset creator
-      TestUserSpecification datasetCreator = datasetCreated.getValue();
-      ApiClient datasetCreatorClient = DataRepoUtils.getClientForTestUser(datasetCreator, server);
-      RepositoryApi repositoryApi = new RepositoryApi(datasetCreatorClient);
-
-      // make the delete dataset request and wait for the job to finish
-      DatasetSummaryModel datasetSummaryModel = datasetCreated.getKey();
-      JobModel deleteDatasetJobResponse = repositoryApi.deleteDataset(datasetSummaryModel.getId());
-      deleteDatasetJobResponse =
-          DataRepoUtils.waitForJobToFinish(repositoryApi, deleteDatasetJobResponse);
-      DataRepoUtils.expectJobSuccess(
-          repositoryApi, deleteDatasetJobResponse, DeleteResponseModel.class);
-      logger.info("Successfully deleted dataset: {}", datasetSummaryModel.getId());
-    }
-
-    // delete any scratch files used for ingesting tabular data
-    StorageUtils.deleteFiles(
-        StorageUtils.getClientForServiceAccount(server.testRunnerServiceAccount), scratchFiles);
-
-    // delete the billing profile
-    super.cleanup(testUsers);
+    //    // delete the datasets created by the user journey threads
+    //    for (Map.Entry<DatasetSummaryModel, TestUserSpecification> datasetCreated :
+    //        datasetsCreated.entrySet()) {
+    //      // get the ApiClient for the dataset creator
+    //      TestUserSpecification datasetCreator = datasetCreated.getValue();
+    //      ApiClient datasetCreatorClient = DataRepoUtils.getClientForTestUser(datasetCreator,
+    // server);
+    //      RepositoryApi repositoryApi = new RepositoryApi(datasetCreatorClient);
+    //
+    //      // make the delete dataset request and wait for the job to finish
+    //      DatasetSummaryModel datasetSummaryModel = datasetCreated.getKey();
+    //      JobModel deleteDatasetJobResponse =
+    // repositoryApi.deleteDataset(datasetSummaryModel.getId());
+    //      deleteDatasetJobResponse =
+    //          DataRepoUtils.waitForJobToFinish(repositoryApi, deleteDatasetJobResponse);
+    //      DataRepoUtils.expectJobSuccess(
+    //          repositoryApi, deleteDatasetJobResponse, DeleteResponseModel.class);
+    //      logger.info("Successfully deleted dataset: {}", datasetSummaryModel.getId());
+    //    }
+    //
+    //    // delete any scratch files used for ingesting tabular data
+    //    StorageUtils.deleteFiles(
+    //        StorageUtils.getClientForServiceAccount(server.testRunnerServiceAccount),
+    // scratchFiles);
+    //
+    //    // delete the billing profile
+    //    super.cleanup(testUsers);
   }
 }

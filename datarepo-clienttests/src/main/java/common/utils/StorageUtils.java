@@ -19,17 +19,34 @@ public class StorageUtils {
   /**
    * Build a Google Storage client object with credentials for the given service account. The client
    * object is newly created on each call to this method; it is not cached.
+   *
+   * <p>This method uses the default project, typically as set by the environment variable
+   * GOOGLE_CLOUD_PROJECT,
    */
   public static Storage getClientForServiceAccount(ServiceAccountSpecification serviceAccount)
       throws Exception {
+    String defaultProjectId = StorageOptions.getDefaultProjectId();
+    return getClientForServiceAccount(serviceAccount, defaultProjectId);
+  }
+
+  /**
+   * Build a Google Storage client object with credentials for the given service account and
+   * project. The client object is newly created on each call to this method; it is not cached.
+   */
+  public static Storage getClientForServiceAccount(
+      ServiceAccountSpecification serviceAccount, String projectId) throws Exception {
     logger.debug(
-        "Fetching credentials and building Storage client object for service account: {}",
-        serviceAccount.name);
+        "Fetching credentials and building Storage client object for service account: {}, project: {}",
+        serviceAccount.name,
+        projectId);
 
     GoogleCredentials serviceAccountCredentials =
         AuthenticationUtils.getServiceAccountCredential(serviceAccount);
     StorageOptions storageOptions =
-        StorageOptions.newBuilder().setCredentials(serviceAccountCredentials).build();
+        StorageOptions.newBuilder()
+            .setCredentials(serviceAccountCredentials)
+            .setProjectId(projectId)
+            .build();
     Storage storageClient = storageOptions.getService();
 
     return storageClient;
