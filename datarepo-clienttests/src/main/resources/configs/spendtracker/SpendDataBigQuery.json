@@ -1,0 +1,19 @@
+{
+  "name": "SpendDataBigQuery",
+  "description": "Create a dataset and upload data to tables.",
+  "serverSpecificationFile": "mmdev.json",
+  "billingAccount": "01C5F5-9F88EC-850831",
+  "kubernetes": {},
+  "application": {},
+  "testScripts": [
+    {
+      "name": "spendtracker.SpendDataBigQuery",
+      "parameters": ["spend-tracker-poc-3"],
+      "numberOfUserJourneyThreadsToRun": 1,
+      "userJourneyThreadPoolSize": 1,
+      "expectedTimeForEach": 10,
+      "expectedTimeForEachUnit": "MINUTES"
+    }
+  ],
+  "testUserFiles": ["voldemort.json"]
+}

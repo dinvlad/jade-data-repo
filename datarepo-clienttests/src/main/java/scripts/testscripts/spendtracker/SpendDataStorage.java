@@ -21,7 +21,6 @@ import runner.config.TestUserSpecification;
 public class SpendDataStorage extends runner.TestScript {
   private static final Logger logger = LoggerFactory.getLogger(SpendDataStorage.class);
 
-  protected static String bucketName;
   protected static String projectId;
   protected static Storage storageClient;
 
@@ -56,8 +55,6 @@ public class SpendDataStorage extends runner.TestScript {
   }
 
   public void userJourney(TestUserSpecification testUser) throws Exception {
-    logger.info("projectId = {}", projectId);
-
     // generate a random bucket name
     String generatedBucketName = FileUtils.randomizeName("spendtrackerpoca-");
     logger.info("generatedBucketName = {}", generatedBucketName);
