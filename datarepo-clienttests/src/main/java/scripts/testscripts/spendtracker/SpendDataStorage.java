@@ -24,7 +24,7 @@ public class SpendDataStorage extends runner.TestScript {
   protected static String projectId;
   protected static Storage storageClient;
 
-  protected static String sourceBucketName = "spend-tracker-poc-2a";
+  protected static String sourceBucketName;
   protected static List<String> sourceFileNames =
       Arrays.asList(
           new String[] {
@@ -40,11 +40,14 @@ public class SpendDataStorage extends runner.TestScript {
           });
 
   public void setParameters(List<String> parameters) {
-    if (parameters == null || parameters.size() < 1) {
-      throw new IllegalArgumentException("Project id must be specified as the first parameter.");
+    if (parameters == null || parameters.size() < 2) {
+      throw new IllegalArgumentException(
+          "Two parameters are required: project id, source bucket name.");
     }
     projectId = parameters.get(0);
+    sourceBucketName = parameters.get(1);
     logger.info("projectId = {}", projectId);
+    logger.info("sourceBucketName = {}", sourceBucketName);
   }
 
   public void setup(List<TestUserSpecification> testUsers) throws Exception {
@@ -70,7 +73,7 @@ public class SpendDataStorage extends runner.TestScript {
             BucketInfo.newBuilder(generatedBucketName)
                 .setStorageClass(StorageClass.STANDARD)
                 .setLocation("US")
-                .setLabels(LabelUtils.sanitizeLabelMap(labels))
+                .setLabels(LabelUtils.validateLabelMap(labels, true))
                 .build());
     logger.info("Created bucket {}, {}", bucket.getName(), bucket.getLabels());
 
@@ -80,7 +83,8 @@ public class SpendDataStorage extends runner.TestScript {
     labels.put("tdr-dataset", FileUtils.randomizeName("datasetid-"));
     labels.put("tdr-billingprofile", FileUtils.randomizeName("billingprofileid-"));
     labels.put("tdr-creator", testUser.name);
-    bucket = bucket.toBuilder().setLabels(LabelUtils.sanitizeLabelMap(labels)).build().update();
+    bucket =
+        bucket.toBuilder().setLabels(LabelUtils.validateLabelMap(labels, true)).build().update();
     logger.info("Updated labels on bucket {}", bucket.getName());
 
     // write files to the bucket

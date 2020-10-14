@@ -61,7 +61,7 @@ public class SpendDataBigQuery extends runner.TestScript {
         bigQueryClient.create(
             DatasetInfo.newBuilder(generatedDatasetName)
                 .setLocation("US")
-                .setLabels(LabelUtils.sanitizeLabelMap(labels))
+                .setLabels(LabelUtils.validateLabelMap(labels, true))
                 .build());
     logger.info("Created dataset {}, {}", dataset.getDatasetId().getDataset(), dataset.getLabels());
 
@@ -71,7 +71,8 @@ public class SpendDataBigQuery extends runner.TestScript {
     labels.put("tdr-dataset", FileUtils.randomizeName("datasetid-"));
     labels.put("tdr-billingprofile", FileUtils.randomizeName("billingprofileid-"));
     labels.put("tdr-creator", testUser.name);
-    dataset = dataset.toBuilder().setLabels(LabelUtils.sanitizeLabelMap(labels)).build().update();
+    dataset =
+        dataset.toBuilder().setLabels(LabelUtils.validateLabelMap(labels, true)).build().update();
     logger.info("Updated labels on dataset {}", dataset.getDatasetId().getDataset());
 
     // add a table
@@ -96,7 +97,7 @@ public class SpendDataBigQuery extends runner.TestScript {
           table
               .toBuilder()
               .setDescription(queryStr)
-              .setLabels(LabelUtils.sanitizeLabelMap(labels))
+              .setLabels(LabelUtils.validateLabelMap(labels, true))
               .build()
               .update();
 

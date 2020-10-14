@@ -1,6 +1,6 @@
 {
-  "name": "SpendDataStorage",
-  "description": "Create a bucket and add files.",
+  "name": "SpendDataStorageRequestorPays",
+  "description": "Create a bucket and add files from a requestor pays bucket.",
   "serverSpecificationFile": "mmdev.json",
   "billingAccount": "01C5F5-9F88EC-850831",
   "kubernetes": {},
@@ -8,7 +8,7 @@
   "testScripts": [
     {
       "name": "spendtracker.SpendDataStorage",
-      "parameters": ["spend-tracker-poc-3", "spend-tracker-poc-2a"],
+      "parameters": ["spend-tracker-poc-3", "spend-tracker-poc-2b"],
       "numberOfUserJourneyThreadsToRun": 1,
       "userJourneyThreadPoolSize": 1,
       "expectedTimeForEach": 10,
