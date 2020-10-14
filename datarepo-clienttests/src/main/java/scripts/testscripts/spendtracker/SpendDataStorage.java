@@ -25,6 +25,7 @@ public class SpendDataStorage extends runner.TestScript {
   protected static Storage storageClient;
 
   protected static String sourceBucketName;
+  protected static boolean requestorPays;
   protected static List<String> sourceFileNames =
       Arrays.asList(
           new String[] {
@@ -40,14 +41,16 @@ public class SpendDataStorage extends runner.TestScript {
           });
 
   public void setParameters(List<String> parameters) {
-    if (parameters == null || parameters.size() < 2) {
+    if (parameters == null || parameters.size() < 3) {
       throw new IllegalArgumentException(
-          "Two parameters are required: project id, source bucket name.");
+          "Three parameters are required: project id, source bucket name, requestor pays boolean.");
     }
     projectId = parameters.get(0);
     sourceBucketName = parameters.get(1);
+    requestorPays = Boolean.getBoolean(parameters.get(2));
     logger.info("projectId = {}", projectId);
     logger.info("sourceBucketName = {}", sourceBucketName);
+    logger.info("requestorPays = {}", requestorPays);
   }
 
   public void setup(List<TestUserSpecification> testUsers) throws Exception {
@@ -92,7 +95,15 @@ public class SpendDataStorage extends runner.TestScript {
       String sourceFileName = sourceFileNames.get(ctr);
       Blob sourceBlob = storageClient.get(BlobId.of(sourceBucketName, sourceFileName));
 
-      CopyWriter copyWriter = sourceBlob.copyTo(BlobId.of(bucket.getName(), sourceFileName));
+      CopyWriter copyWriter;
+      if (requestorPays) {
+        copyWriter =
+            sourceBlob.copyTo(
+                BlobId.of(bucket.getName(), sourceFileName),
+                Blob.BlobSourceOption.userProject(projectId));
+      } else {
+        copyWriter = sourceBlob.copyTo(BlobId.of(bucket.getName(), sourceFileName));
+      }
       Blob targetBlob = copyWriter.getResult();
       logger.info(
           "Wrote file to bucket: {}, {} KB", targetBlob.getName(), targetBlob.getSize() / 1000);
