@@ -138,7 +138,11 @@ jobs:
             fi
             echo "Retry #${RETRY_COUNT}: Waiting for $PERF_VERSION to equal ${{ steps.read_property.outputs.LATEST_VERSION }}"
             sleep 15
-            PERF_VERSION=$(curl -s -X GET "https://jade-perf.datarepo-perf.broadinstitute.org/configuration" -H "accept: application/json" | jq -r '.semVer|rtrimstr("-SNAPSHOT")')
+            if PERF_VERSION=$(curl -s -X GET "https://jade-perf.datarepo-perf.broadinstitute.org/configuration" -H "accept: application/json" | jq -r '.semVer|rtrimstr("-SNAPSHOT")'); then
+              echo "Perf current version: ${PERF_VERSION}"
+            else
+              echo "Failed to ping perf"
+            fi
             ((RETRY_COUNT=RETRY_COUNT+1))
           done;
           echo "Perf successfully running on new version: $PERF_VERSION"
