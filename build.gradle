@@ -11,8 +11,6 @@
  *   https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_source_sets
  */
 
-import io.swagger.codegen.config.CodegenConfigurator
-import io.swagger.codegen.DefaultGenerator
 
 buildscript {
     ext {
@@ -23,8 +21,9 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath('io.swagger:swagger-codegen:2.4.11')
         classpath('gradle.plugin.com.srcclr:gradle:3.1.0')
+        classpath('io.swagger.core.v3:swagger-annotations:2.1.5')
+        classpath('io.swagger.codegen.v3:swagger-codegen-cli:3.0.23')
     }
 }
 
@@ -33,6 +32,7 @@ plugins {
   id 'org.liquibase.gradle' version '2.0.1'
   id 'antlr'
   id 'com.github.spotbugs' version '4.5.1'
+  id "org.hidetake.swagger.generator" version "2.18.2"
 }
 
 allprojects {
@@ -160,8 +160,6 @@ dependencies {
     compile 'com.google.cloud:google-cloud-storage:1.108.0'
     compile 'com.google.cloud:google-cloud-firestore:1.22.0'
     compile group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.104.1'
-    compile 'io.springfox:springfox-swagger-ui:2.10.0'
-    compile 'io.springfox:springfox-swagger2:2.9.2'
     compile 'org.apache.commons:commons-dbcp2:2.7.0'     // For database connection support
     compile 'org.apache.commons:commons-lang3:3.9'
     compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
@@ -169,7 +167,11 @@ dependencies {
     compile 'org.liquibase:liquibase-core:3.8.0'         // For upgrade
     compile 'org.postgresql:postgresql:42.2.8'           // Postgres jdbc driver
     compile 'org.slf4j:slf4j-api:1.7.28'                 // Logging facade
-    compile "org.springframework.boot:spring-boot-starter-web:2.2.6.RELEASE"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation group: "javax.validation", name: "validation-api"
+
+    implementation group: "io.swagger.core.v3", name: "swagger-annotations", version: "2.1.5"
+    implementation group: "io.swagger.codegen.v3", name: "swagger-codegen-cli", version: "3.0.23"
 
     compile 'org.springframework:spring-jdbc:5.1.9.RELEASE'
     compile 'org.springframework.cloud:spring-cloud-gcp-starter-logging:1.2.5.RELEASE'
@@ -218,10 +220,17 @@ dependencies {
     testCompile 'com.google.code.findbugs:annotations:3.0.1'
 
     generatedCompile 'org.springframework.boot:spring-boot-starter-web'
-    // boot-starter-validation required for javax.validation.Valid references, @Valid tags
-    generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
     generatedCompile 'io.springfox:springfox-swagger2:2.7.0'
     generatedCompile 'io.springfox:springfox-swagger-ui:2.7.0'
+    // boot-starter-validation required for javax.validation.Valid references, @Valid tags
+
+    generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation group: "org.webjars", name: "webjars-locator-core", version: "0.46"
+    runtimeOnly group: "org.webjars.npm", name: "swagger-ui-dist", version: "3.35.2"
+    generatedCompile group: "io.swagger.core.v3", name: "swagger-annotations", version: "2.1.5"
+    generatedCompile group: "io.swagger.codegen.v3", name: "swagger-codegen-cli", version: "3.0.23"
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.23'
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 }
@@ -238,7 +247,7 @@ def getGitHash = { ->
 def openapiSourceFile = 'src/main/resources/data-repository-openapi.yaml'
 def generatedOutputDir = 'src/generated/java'
 
-task generateApi {
+/*task generateApi {
     // specify the task inputs and outputs so gradle knows what to rebuild based on what has changed
     inputs.file("$projectDir/$openapiSourceFile")
     outputs.dir("$projectDir/$generatedOutputDir")
@@ -261,6 +270,26 @@ task generateApi {
                 'sourceFolder'  : generatedOutputDir
         ])
         new DefaultGenerator().opts(config.toClientOptInput()).generate()
+    }
+}*/
+
+swaggerSources {
+    server {
+        inputFile = file("$projectDir/$openapiSourceFile")
+        code {
+            language = "spring"
+            library = "spring-boot"
+            outputDir = file("$projectDir/$generatedOutputDir")
+            components = ["models", "apis"]
+            rawOptions = [
+                "--invoker-package", "bio.terra",
+                "--api-package", "bio.terra.controller",
+                "--model-package", "bio.terra.model",
+                "-D", "interfaceOnly=true," +
+                    "useTags=true," +
+                    "dateLibrary=java8"
+            ]
+        }
     }
 }
 
@@ -318,6 +347,7 @@ sourceSets {
         toolVersion '0.8.2'
     }
 }
+sourceSets.main.java.srcDir "${buildDir}/generated-src/swagger"
 
 bootRun {
     classpath += sourceSets.generated.output
@@ -400,8 +430,8 @@ task testAll(type: Test) {
     outputs.upToDateWhen { false }
 }
 
-compileGeneratedJava.dependsOn generateApi
+compileGeneratedJava.dependsOn swaggerSources.server.code
 compileGeneratedJava.dependsOn generateGrammarSource
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
-ideaModule.dependsOn generateApi
+ideaModule.dependsOn swaggerSources.server.code
