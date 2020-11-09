@@ -80,7 +80,7 @@ public class DatasetBucketLinkTest extends UsersBase {
             dataRepoFixtures.deleteDataset(steward(), datasetId);
         }
         if (secondDatasetId != null) {
-            dataRepoFixtures.deleteDataset(steward(), datasetId);
+            dataRepoFixtures.deleteDataset(steward(), secondDatasetId);
         }
     }
 
@@ -98,7 +98,7 @@ public class DatasetBucketLinkTest extends UsersBase {
 
         // create second dataset w/ profile
         secondDatasetSummaryModel = dataRepoFixtures.createDataset(steward(), "bucket-link-test-dup-dataset.json");
-        secondDatasetId = datasetSummaryModel.getId();
+        secondDatasetId = secondDatasetSummaryModel.getId();
         logger.info("created second dataset " + secondDatasetId);
         dataRepoFixtures.addDatasetPolicyMember(
             steward(), secondDatasetSummaryModel.getId(), IamRole.CUSTODIAN, custodian().getEmail());
@@ -136,14 +136,10 @@ public class DatasetBucketLinkTest extends UsersBase {
         logger.info("Not Tried files: " + loadSummary.getNotTriedFiles());
 
         BulkLoadArrayResultModel secondResult = dataRepoFixtures.bulkLoadArray(steward(), secondDatasetId, arrayLoad);
-        BulkLoadResultModel secondLoadSummary =secondResult.getLoadSummary();
+        BulkLoadResultModel secondLoadSummary = secondResult.getLoadSummary();
         logger.info("Total files    : " + secondLoadSummary.getTotalFiles());
         logger.info("Succeeded files: " + secondLoadSummary.getSucceededFiles());
         logger.info("Failed files   : " + secondLoadSummary.getFailedFiles());
         logger.info("Not Tried files: " + secondLoadSummary.getNotTriedFiles());
     }
-
-
-
-
 }
