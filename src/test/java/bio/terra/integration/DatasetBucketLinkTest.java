@@ -128,6 +128,7 @@ public class DatasetBucketLinkTest extends UsersBase {
         }
 
         BulkLoadArrayResultModel result = dataRepoFixtures.bulkLoadArray(steward(), datasetId, arrayLoad);
+        result.getLoadFileResults().forEach(r -> logger.info("Bucket for dataset 1: " + r.getTargetPath()));
 
         BulkLoadResultModel loadSummary = result.getLoadSummary();
         logger.info("Total files    : " + loadSummary.getTotalFiles());
@@ -136,6 +137,7 @@ public class DatasetBucketLinkTest extends UsersBase {
         logger.info("Not Tried files: " + loadSummary.getNotTriedFiles());
 
         BulkLoadArrayResultModel secondResult = dataRepoFixtures.bulkLoadArray(steward(), secondDatasetId, arrayLoad);
+        secondResult.getLoadFileResults().forEach(r -> logger.info("Bucket for dataset 2: " + r.getTargetPath()));
         BulkLoadResultModel secondLoadSummary = secondResult.getLoadSummary();
         logger.info("Total files    : " + secondLoadSummary.getTotalFiles());
         logger.info("Succeeded files: " + secondLoadSummary.getSucceededFiles());

@@ -12,10 +12,13 @@ import bio.terra.stairway.FlightMap;
 import bio.terra.stairway.Step;
 import bio.terra.stairway.StepResult;
 import bio.terra.stairway.StepStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IngestFilePrimaryDataLocationStep implements Step {
     private final ResourceService resourceService;
     private final Dataset dataset;
+    private static final Logger logger = LoggerFactory.getLogger(IngestFilePrimaryDataLocationStep.class);
 
     public IngestFilePrimaryDataLocationStep(ResourceService resourceService,
                                              Dataset dataset) {
@@ -40,6 +43,12 @@ public class IngestFilePrimaryDataLocationStep implements Step {
                         dataset.getName(),
                         billingProfile,
                         context.getFlightId());
+                logger.info("Bucket for File: Name: {}; Resource, id: {}, profile id; {}; resource Id: {}; region: {}",
+                    bucketForFile.getName(),
+                    bucketForFile.getProjectResource().getId(),
+                    bucketForFile.getProfileId(),
+                    bucketForFile.getResourceId(),
+                    bucketForFile.getRegion());
                 workingMap.put(FileMapKeys.BUCKET_INFO, bucketForFile);
             } catch (BucketLockException blEx) {
                 return new StepResult(StepStatus.STEP_RESULT_FAILURE_RETRY, blEx);
