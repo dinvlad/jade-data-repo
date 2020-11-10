@@ -331,7 +331,8 @@ sourceSets {
 //    }
 }
 
-sourceSets.main.java.srcDir "${buildDir}/generated-src/swagger"
+sourceSets.main.java.srcDir "${buildDir}/src/main/java"
+sourceSets.main.resources.srcDir "${buildDir}/src/main/resources"
 
 bootRun {
     classpath += sourceSets.generated.output
