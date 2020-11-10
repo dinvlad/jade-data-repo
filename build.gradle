@@ -37,7 +37,7 @@ allprojects {
     version '1.0.152-SNAPSHOT'
 
     ext {
-        resourceDir = "${rootDir}/src/main/resources/api"
+        resourceDir = "${rootDir}/src/main/resources"
     }
 
     // specifying versions for dependencies, not adding the dependencies themselves (yet)
@@ -180,8 +180,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web"
     implementation group: "javax.validation", name: "validation-api"
 
-    implementation group: "io.swagger.core.v3", name: "swagger-annotations"
-    swaggerCodegen group: "io.swagger.codegen.v3", name: "swagger-codegen-cli"
+    implementation group: "io.swagger.core.v3", name: "swagger-annotations", version: "2.1.5"
+    implementation group: "io.swagger.codegen.v3", name: "swagger-codegen-cli", version: "3.0.23"
 
     compile 'org.springframework:spring-jdbc:5.1.9.RELEASE'
     compile 'org.springframework.cloud:spring-cloud-gcp-starter-logging:1.2.5.RELEASE'
@@ -235,7 +235,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation group: "org.webjars", name: "webjars-locator-core", version: "0.46"
     runtimeOnly group: "org.webjars.npm", name: "swagger-ui-dist", version: "3.35.2"
-    generatedCompile group: "io.swagger.core.v3", name: "swagger-annotations"
+    generatedCompile group: "io.swagger.core.v3", name: "swagger-annotations", version: "2.1.5"
+    generatedCompile group: "io.swagger.codegen.v3", name: "swagger-codegen-cli", version: "3.0.23"
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.23'
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 }
@@ -249,13 +251,16 @@ def getGitHash = { ->
     return stdout.toString().trim()
 }
 
+def openapiSourceFile = 'src/main/resources/data-repository-openapi.yaml'
+def generatedOutputDir = 'src/generated/java'
+
 swaggerSources {
     server {
-        inputFile = file("${resourceDir}/data-repository-openapi.yaml")
+        inputFile = file("$projectDir/$openapiSourceFile")
         code {
             language = "spring"
             library = "spring-boot"
-            outputDir = file("${buildDir}/generated-src/swagger")
+            outputDir = file("$projectDir/$generatedOutputDir")
             components = ["models", "apis"]
             rawOptions = [
                 "--invoker-package", "bio.terra",
@@ -288,8 +293,6 @@ task unpack(type: Copy) {
     from(zipTree(tasks.bootJar.outputs.files.singleFile))
     into("build/dependency")
 }
-
-def generatedOutputDir = 'src/generated/java'
 
 clean.doFirst {
     delete("${projectDir}/$generatedOutputDir")
