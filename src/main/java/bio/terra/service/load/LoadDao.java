@@ -99,7 +99,7 @@ public class LoadDao {
             }
 
             // It is locked by someone else
-            if (!StringUtils.equals(load.getLockingFlightId(), flightId)) {
+            if (load.getLockingFlightId() != flightId) {
                 throw new LoadLockedException("Load '" + loadTag +
                     "' is locked by flight '" + load.getLockingFlightId() + "'");
             }
