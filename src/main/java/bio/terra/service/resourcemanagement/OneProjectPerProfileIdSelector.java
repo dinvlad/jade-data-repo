@@ -36,6 +36,7 @@ public class OneProjectPerProfileIdSelector implements DataLocationSelector {
         return projectIdForFile(datasetName, billingProfile) + "-bucket";
     }
 
+    // in production, the current behavior is to link a new data project to the project plus billing profile? Why?
     private String getSuffixForProfileId(BillingProfileModel billingProfile) {
         String lowercaseProfileName = billingProfile.getProfileName().toLowerCase();
         String profileSuffix = "-" + lowercaseProfileName.replaceAll("[^a-z-0-9]", "-");

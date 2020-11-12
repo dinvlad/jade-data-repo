@@ -67,12 +67,12 @@ public class DatasetBucketDao {
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
     public void createDatasetBucketLink(UUID datasetId, UUID bucketResourceId) {
         if (datasetBucketLinkExists(datasetId, bucketResourceId)) {
-            logger.info("Bucket link exists between datasetId & resourceId: {}: {}", datasetId, bucketResourceId);
+            logger.info("[BUCKET_TESTING] Bucket link exists between datasetId & resourceId: {}: {}", datasetId, bucketResourceId);
             // If the link is already made then increment our use of it.
             incrementDatasetBucketLink(datasetId, bucketResourceId);
         } else {
             // Not there, try creating it
-            logger.info("Creating bucket link between datasetId & resourceId: {}: {}", datasetId, bucketResourceId);
+            logger.info("[BUCKET_TESTING] Creating bucket link between datasetId & resourceId: {}: {}", datasetId, bucketResourceId);
             datasetBucketLinkUpdate(sqlCreateLink, datasetId, bucketResourceId);
         }
     }

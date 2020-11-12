@@ -7,6 +7,8 @@ import bio.terra.stairway.FlightContext;
 import bio.terra.stairway.FlightMap;
 import bio.terra.stairway.Step;
 import bio.terra.stairway.StepResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class AuthorizeBillingProfileUseStep implements Step {
     private final ProfileService profileService;
     private final UUID profileId;
     private final AuthenticatedUserRequest user;
+    private static Logger logger = LoggerFactory.getLogger(AuthorizeBillingProfileUseStep.class);
 
     public AuthorizeBillingProfileUseStep(ProfileService profileService,
                                           String profileId,
@@ -34,7 +37,11 @@ public class AuthorizeBillingProfileUseStep implements Step {
 
     @Override
     public StepResult doStep(FlightContext context) throws InterruptedException {
+        logger.info("[BUCKET_TESTING]: Profile id: {}; This profile id should match the profile id that" +
+                "was the result from the CreateProfileFlight", profileId);
         BillingProfileModel profileModel = profileService.authorizeLinking(profileId, user);
+        logger.info("[BUCKET_TESTING]: Profile Model - Should match the profile that" +
+            "was the result from the CreateProfileFlight", profileModel.toString());
         FlightMap workingMap = context.getWorkingMap();
         workingMap.put(ProfileMapKeys.PROFILE_MODEL, profileModel);
         return StepResult.getStepResultSuccess();

@@ -36,6 +36,9 @@ public class CreateDatasetMetadataStep implements Step {
     public StepResult doStep(FlightContext context) {
         try {
             FlightMap workingMap = context.getWorkingMap();
+            // project resource id? When was this added?
+            // When we "get or create project", this is the id that is returned
+            // PROJECT_RESOURCE_ID =  id of the project resource in the datarepo metadata
             UUID projectResourceId = workingMap.get(DatasetWorkingMapKeys.PROJECT_RESOURCE_ID, UUID.class);
             UUID datasetId = workingMap.get(DatasetWorkingMapKeys.DATASET_ID, UUID.class);
             Dataset newDataset = DatasetUtils.convertRequestWithGeneratedNames(datasetRequest)

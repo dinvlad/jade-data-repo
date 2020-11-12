@@ -313,6 +313,9 @@ public class DatasetDao {
 
         }
         dataset.createdDate(keyHolder.getCreatedDate());
+        // Q: What tables? Look into this more. What all is getting created here?
+        logger.info("[BUCKET_TESTING]: We've added a row into dataset, now creating other tables: {}",
+            dataset.getTables().toString());
         tableDao.createTables(dataset.getId(), dataset.getTables());
         relationshipDao.createDatasetRelationships(dataset);
         assetDao.createAssets(dataset);

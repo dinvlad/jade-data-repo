@@ -43,7 +43,7 @@ public class IngestFilePrimaryDataLocationStep implements Step {
                         dataset.getName(),
                         billingProfile,
                         context.getFlightId());
-                logger.info("Bucket for File: Name: {}; Resource, id: {}, profile id; {}; resource Id: {}; region: {}",
+                logger.info("[BUCKET_TESTING] Bucket for File: Name: {}; Resource, id: {}, profile id; {}; resource Id: {}; region: {}",
                     bucketForFile.getName(),
                     bucketForFile.getProjectResource().getId(),
                     bucketForFile.getProfileId(),

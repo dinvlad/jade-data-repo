@@ -81,6 +81,10 @@ public class GoogleProjectService {
         throws InterruptedException {
 
         try {
+            // we are only grabbing the project by the project name
+            // and not considering the billing profile id.
+            // so, if we find the project already exists, we just kinda drop that profile id
+            // It however should be mapped to the dataset's default_profile_id
             return resourceDao.retrieveProjectByGoogleProjectId(googleProjectId);
         } catch (GoogleResourceNotFoundException e) {
             logger.info("no project resource found for projectId: {}", googleProjectId);
@@ -94,6 +98,8 @@ public class GoogleProjectService {
         // TODO: change the boolean when we have plumbed in the allowReuseExistingProjects flag.
         Project existingProject = getProject(googleProjectId);
         if (existingProject != null) { // TODO: && resourceConfiguration.getAllowReuseExistingProjects()) {
+            // Why Setbilling = false? is this always the case? will we change that with this pr? Would
+            // billing info be a probably passed in?
             return initializeProject(existingProject, billingProfile, roleIdentityMapping, false);
         }
 
@@ -185,6 +191,9 @@ public class GoogleProjectService {
         String googleProjectNumber = project.getProjectNumber().toString();
         String googleProjectId = project.getProjectId();
 
+        // billing profile id is assigned to the google project
+        // Q: Is there why we're getting consistently the same profile id? It's grabbing it off of the google
+        // project instead of the newly create profile id?
         GoogleProjectResource googleProjectResource =
             new GoogleProjectResource()
                 .profileId(UUID.fromString(billingProfile.getId()))

@@ -29,7 +29,7 @@ public class DatasetRelationshipDao {
             create(rel);
         }
     }
-
+    // Q: why are we adding to the dataset_relationship table? How is this used/how does it fit in with everything?
     protected void create(Relationship relationship) {
         String sql = "INSERT INTO dataset_relationship " +
                 "(name, from_table, from_column, to_table, to_column) VALUES " +

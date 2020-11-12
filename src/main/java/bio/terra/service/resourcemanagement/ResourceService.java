@@ -146,9 +146,12 @@ public class ResourceService {
      */
     public UUID getOrCreateDatasetProject(String datasetName,
                                           BillingProfileModel billingProfile) throws InterruptedException {
-
+        logger.info("[BUCKET_TESTING]: getOrCreateProject - single data project for testing instances. ");
+        // Q: What will this look like in production? (the NOT one location version?)
+        // custom data project per projectid/billing profile combo
         GoogleProjectResource googleProjectResource = projectService.getOrCreateProject(
-            dataLocationSelector.projectIdForSnapshot(datasetName, billingProfile),
+            //TODO: Should this be projectIdForDataset?  Doesn't appear to matter too much until we go to production
+            dataLocationSelector.projectIdForDataset(datasetName, billingProfile),
             billingProfile,
             getStewardPolicy());
 
