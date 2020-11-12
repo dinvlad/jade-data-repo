@@ -149,6 +149,9 @@ public class ResourceService {
         logger.info("[BUCKET_TESTING]: getOrCreateProject - single data project for testing instances. ");
         // Q: What will this look like in production? (the NOT one location version?)
         // custom data project per projectid/billing profile combo
+        // Q: We're passing in the billing profile -
+        // BUT we're only using it in the case we need to create a new project
+        // We're NOT using it to get a more specific project_resource
         GoogleProjectResource googleProjectResource = projectService.getOrCreateProject(
             //TODO: Should this be projectIdForDataset?  Doesn't appear to matter too much until we go to production
             dataLocationSelector.projectIdForDataset(datasetName, billingProfile),
