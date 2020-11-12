@@ -68,6 +68,7 @@ public class DataRepoFixtures {
     public BillingProfileModel createBillingProfile(TestConfiguration.User user) throws Exception {
         BillingProfileRequestModel billingProfileRequestModel = ProfileFixtures.billingProfileRequest(
             ProfileFixtures.billingProfileForAccount(testConfig.getGoogleBillingAccountId()));
+        logger.info("[BUCKET_TESTING]: Create billing profile request: {}", billingProfileRequestModel.toString());
         String json = TestUtils.mapToJson(billingProfileRequestModel);
 
         DataRepoResponse<JobModel> jobResponse = dataRepoClient.post(
@@ -103,6 +104,35 @@ public class DataRepoFixtures {
             "/api/repository/v1/datasets",
             json,
             JobModel.class);
+    }
+
+    public DataRepoResponse<JobModel> createDatasetWithProfileRaw(
+        TestConfiguration.User user, BillingProfileModel billingProfileModel, String filename)
+        throws Exception {
+        DatasetRequestModel requestModel = jsonLoader.loadObject(filename, DatasetRequestModel.class);
+        requestModel.setDefaultProfileId(billingProfileModel.getId());
+        requestModel.setName(Names.randomizeName(requestModel.getName()));
+        String json = TestUtils.mapToJson(requestModel);
+
+        return dataRepoClient.post(
+            user,
+            "/api/repository/v1/datasets",
+            json,
+            JobModel.class);
+    }
+
+    public DatasetSummaryModel createDatasetWithProfile(TestConfiguration.User user,
+                                                        BillingProfileModel billingProfileModel,
+                                                        String filename) throws Exception {
+        DataRepoResponse<JobModel> jobResponse = createDatasetWithProfileRaw(user, billingProfileModel, filename);
+        assertTrue("dataset create launch succeeded", jobResponse.getStatusCode().is2xxSuccessful());
+        assertTrue("dataset create launch response is present", jobResponse.getResponseObject().isPresent());
+
+        DataRepoResponse<DatasetSummaryModel> response = dataRepoClient.waitForResponse(
+            user, jobResponse, DatasetSummaryModel.class);
+        assertThat("dataset create is successful", response.getStatusCode(), equalTo(HttpStatus.CREATED));
+        assertTrue("dataset create response is present", response.getResponseObject().isPresent());
+        return response.getResponseObject().get();
     }
 
     public DatasetSummaryModel createDataset(TestConfiguration.User user, String filename) throws Exception {

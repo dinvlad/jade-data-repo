@@ -34,6 +34,7 @@ public class CreateDatasetAuthzBqJobUserStep implements Step {
         UUID datasetId = workingMap.get(DatasetWorkingMapKeys.DATASET_ID, UUID.class);
         Map<IamRole, String> policies = workingMap.get(DatasetWorkingMapKeys.POLICY_EMAILS, Map.class);
         Dataset dataset = datasetService.retrieve(datasetId);
+        // Q: how is this different from the acl step?
         resourceService.grantPoliciesBqJobUser(
             dataset.getProjectResource().getGoogleProjectId(),
             policies.values());

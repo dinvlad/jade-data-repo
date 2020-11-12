@@ -30,7 +30,9 @@ public class CreateProfileMetadataStep implements Step {
 
     @Override
     public StepResult doStep(FlightContext context) {
+        logger.info("[BUCKET_TESTING]: Profile Create request: {}", profileRequest.toString());
         BillingProfileModel profileModel = profileService.createProfileMetadata(profileRequest, user);
+        logger.info("[BUCKET_TESTING]: Profile Create response: {}", profileModel.toString());
         FlightMap workingMap = context.getWorkingMap();
         workingMap.put(JobMapKeys.RESPONSE.getKeyName(), profileModel);
         workingMap.put(JobMapKeys.STATUS_CODE.getKeyName(), HttpStatus.CREATED);

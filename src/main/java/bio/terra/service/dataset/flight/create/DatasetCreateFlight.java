@@ -66,8 +66,6 @@ public class DatasetCreateFlight extends Flight {
 
         addStep(new CreateDatasetPrimaryDataStep(bigQueryPdao, datasetDao));
 
-        //TODO - Shelby - pick up here
-
         // The underlying service provides retries so we do not need to retry for IAM step
         addStep(new CreateDatasetAuthzIamStep(iamClient, userReq));
 

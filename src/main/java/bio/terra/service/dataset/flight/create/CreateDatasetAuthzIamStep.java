@@ -35,6 +35,7 @@ public class CreateDatasetAuthzIamStep implements Step {
         UUID datasetId = workingMap.get(DatasetWorkingMapKeys.DATASET_ID, UUID.class);
         Map<IamRole, String> policyEmails = iamClient.createDatasetResource(userReq, datasetId);
         workingMap.put(DatasetWorkingMapKeys.POLICY_EMAILS, policyEmails);
+        logger.info("[BUCKET_TESTING]: Added IAM polices for dataset resource: {}", policyEmails.toString());
         return StepResult.getStepResultSuccess();
     }
 

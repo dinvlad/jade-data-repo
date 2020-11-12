@@ -3,11 +3,7 @@ package bio.terra.integration;
 import bio.terra.common.category.Integration;
 import bio.terra.common.configuration.TestConfiguration;
 import bio.terra.common.fixtures.Names;
-import bio.terra.model.BulkLoadArrayRequestModel;
-import bio.terra.model.BulkLoadArrayResultModel;
-import bio.terra.model.BulkLoadFileModel;
-import bio.terra.model.BulkLoadResultModel;
-import bio.terra.model.DatasetSummaryModel;
+import bio.terra.model.*;
 import bio.terra.service.iam.IamRole;
 
 import org.junit.After;
@@ -48,11 +44,12 @@ public class DatasetBucketLinkTest extends UsersBase {
     private String datasetId;
     private String secondDatasetId;
     private String profileId;
-    private String profileId1;
-    private String profileId2;
+    private BillingProfileModel billingProfileModel1;
+    private BillingProfileModel billingProfileModel2;
 
     @Before
     public void setup() throws Exception {
+        logger.info("[BUCKET_TESTING]: --------------------Setup start----------------");
         super.setup();
 
     }
@@ -130,22 +127,25 @@ public class DatasetBucketLinkTest extends UsersBase {
 
     @Test
     public void twoProfileBucketLinkTest() throws Exception {
-        profileId1 = dataRepoFixtures.createBillingProfile(steward()).getId();
-        logger.info("Profile 1: {}", profileId1);
+        logger.info("[BUCKET_TESTING]: --------------------Test start----------------");
+        billingProfileModel1 = dataRepoFixtures.createBillingProfile(steward());
+        logger.info("Profile 1: {}", billingProfileModel1.toString());
 
-        profileId2 = dataRepoFixtures.createBillingProfile(custodian()).getId();
-        logger.info("Profile 2: {}", profileId2);
+        billingProfileModel2 = dataRepoFixtures.createBillingProfile(custodian());
+        logger.info("Profile 2: {}", billingProfileModel2.toString());
 
 
-        // create first dataset w/ profile
-        datasetSummaryModel = dataRepoFixtures.createDataset(steward(), "bucket-link-test-dataset.json");
+        // create first dataset w/ profile 1
+        datasetSummaryModel = dataRepoFixtures.createDatasetWithProfile(
+            steward(), billingProfileModel1, "bucket-link-test-dataset.json");
         datasetId = datasetSummaryModel.getId();
         logger.info("created dataset " + datasetId);
         dataRepoFixtures.addDatasetPolicyMember(
             steward(), datasetSummaryModel.getId(), IamRole.CUSTODIAN, custodian().getEmail());
 
-        // create second dataset w/ profile
-        secondDatasetSummaryModel = dataRepoFixtures.createDataset(steward(), "bucket-link-test-dup-dataset.json");
+        // create second dataset w/ profile 2
+        secondDatasetSummaryModel = dataRepoFixtures.createDatasetWithProfile(
+            steward(), billingProfileModel2, "bucket-link-test-dup-dataset.json");
         secondDatasetId = secondDatasetSummaryModel.getId();
         logger.info("created second dataset " + secondDatasetId);
         dataRepoFixtures.addDatasetPolicyMember(
@@ -174,7 +174,7 @@ public class DatasetBucketLinkTest extends UsersBase {
             arrayLoad.addLoadArrayItem(model);
         }
 
-        arrayLoad.setProfileId(profileId1);
+        arrayLoad.setProfileId(billingProfileModel1.getId());
         BulkLoadArrayResultModel result = dataRepoFixtures.bulkLoadArray(steward(), datasetId, arrayLoad);
         result.getLoadFileResults().forEach(r -> logger.info("Bucket for dataset 1, profile 1: " + r.getTargetPath()));
 
@@ -184,7 +184,7 @@ public class DatasetBucketLinkTest extends UsersBase {
         logger.info("Failed files   : " + loadSummary.getFailedFiles());
         logger.info("Not Tried files: " + loadSummary.getNotTriedFiles());
 
-        arrayLoad.setProfileId(profileId2);
+        arrayLoad.setProfileId(billingProfileModel2.getId());
         BulkLoadArrayResultModel secondResult = dataRepoFixtures.bulkLoadArray(steward(), secondDatasetId, arrayLoad);
         secondResult.getLoadFileResults().forEach(r -> logger.info("Bucket for dataset 2, profile 2: " + r.getTargetPath()));
         BulkLoadResultModel secondLoadSummary = secondResult.getLoadSummary();

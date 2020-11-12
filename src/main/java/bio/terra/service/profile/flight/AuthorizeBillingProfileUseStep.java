@@ -38,10 +38,10 @@ public class AuthorizeBillingProfileUseStep implements Step {
     @Override
     public StepResult doStep(FlightContext context) throws InterruptedException {
         logger.info("[BUCKET_TESTING]: Profile id: {}; This profile id should match the profile id that" +
-                "was the result from the CreateProfileFlight", profileId);
+                "was the result from the ProfileCreateFlight", profileId);
         BillingProfileModel profileModel = profileService.authorizeLinking(profileId, user);
         logger.info("[BUCKET_TESTING]: Profile Model - Should match the profile that" +
-            "was the result from the CreateProfileFlight", profileModel.toString());
+            "was the result from the ProfileCreateFlight: {}", profileModel.toString());
         FlightMap workingMap = context.getWorkingMap();
         workingMap.put(ProfileMapKeys.PROFILE_MODEL, profileModel);
         return StepResult.getStepResultSuccess();
