@@ -99,7 +99,7 @@ test {
 }
 
 application {
-    mainClassName = 'common.commands.PrintHelp'
+    mainClassName = 'bio.terra.testrunner.common.commands.PrintHelp'
 }
 
 task(runTest, dependsOn: 'classes', type: JavaExec) {
