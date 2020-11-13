@@ -100,35 +100,35 @@ test {
 }
 
 application {
-    mainClassName = 'common.commands.PrintHelp'
+    mainClassName = 'bio.terra.testrunner.common.commands.PrintHelp'
 }
 
 task(runTest, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.RunTest"
+    main = "bio.terra.testrunner.common.commands.RunTest"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(lockNamespace, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.LockNamespace"
+    main = "bio.terra.testrunner.common.commands.LockNamespace"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(unlockNamespace, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.UnlockNamespace"
+    main = "bio.terra.testrunner.common.commands.UnlockNamespace"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(lockAndRunTest, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.LockAndRunTest"
+    main = "bio.terra.testrunner.common.commands.LockAndRunTest"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(collectMeasurements, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.CollectMeasurements"
+    main = "bio.terra.testrunner.common.commands.CollectMeasurements"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(uploadResults, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.UploadResults"
+    main = "bio.terra.testrunner.common.commands.UploadResults"
     classpath = sourceSets.main.runtimeClasspath
 }
 task(printHelp, dependsOn: 'classes', type: JavaExec) {
-    main = "common.commands.PrintHelp"
+    main = "bio.terra.testrunner.common.commands.PrintHelp"
     classpath = sourceSets.main.runtimeClasspath
 }
 
