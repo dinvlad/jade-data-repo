@@ -2,6 +2,8 @@ package scripts.testscripts;
 
 import bio.terra.datarepo.api.UnauthenticatedApi;
 import bio.terra.datarepo.client.ApiClient;
+import bio.terra.datarepo.client.ApiResponse;
+import bio.terra.datarepo.model.RepositoryStatusModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import runner.config.TestUserSpecification;
@@ -18,9 +20,11 @@ public class ServiceStatus extends runner.TestScript {
   public void userJourney(TestUserSpecification testUser) throws Exception {
     ApiClient apiClient = DataRepoUtils.getClientForTestUser(testUser, server);
     UnauthenticatedApi unauthenticatedApi = new UnauthenticatedApi(apiClient);
-    unauthenticatedApi.serviceStatus();
+    ApiResponse<RepositoryStatusModel> serviceStatusResponse =
+        unauthenticatedApi.serviceStatusWithHttpInfo();
+    logger.debug("Service status: {}", serviceStatusResponse.getData().isOk());
 
-    int httpStatus = unauthenticatedApi.getApiClient().getStatusCode();
-    logger.debug("Service status: {}", httpStatus);
+    int httpStatus = serviceStatusResponse.getStatusCode();
+    logger.debug("HTTP status: {}", httpStatus);
   }
 }

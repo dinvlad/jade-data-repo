@@ -2,6 +2,8 @@ package scripts.deploymentscripts;
 
 import bio.terra.datarepo.api.UnauthenticatedApi;
 import bio.terra.datarepo.client.ApiClient;
+import bio.terra.datarepo.client.ApiResponse;
+import bio.terra.datarepo.model.RepositoryStatusModel;
 import com.google.api.client.http.HttpStatusCodes;
 import common.utils.ProcessUtils;
 import java.io.File;
@@ -77,8 +79,9 @@ public class LaunchLocalProcess extends DeploymentScript {
     UnauthenticatedApi unauthenticatedApi = new UnauthenticatedApi(apiClient);
     // call the unauthenticated status endpoint
     try {
-      unauthenticatedApi.serviceStatus();
-      int httpStatus = unauthenticatedApi.getApiClient().getStatusCode();
+      ApiResponse<RepositoryStatusModel> serviceStatusResponse =
+          unauthenticatedApi.serviceStatusWithHttpInfo();
+      int httpStatus = serviceStatusResponse.getStatusCode();
       statusRequestOK = HttpStatusCodes.isSuccess(httpStatus);
     } catch (Exception ex) {
       statusRequestOK = false;
@@ -118,8 +121,9 @@ public class LaunchLocalProcess extends DeploymentScript {
     while (pollCtr >= 0) {
       // call the unauthenticated status endpoint
       try {
-        unauthenticatedApi.serviceStatus();
-        int httpStatus = unauthenticatedApi.getApiClient().getStatusCode();
+        ApiResponse<RepositoryStatusModel> serviceStatusResponse =
+            unauthenticatedApi.serviceStatusWithHttpInfo();
+        int httpStatus = serviceStatusResponse.getStatusCode();
         logger.debug("Service status: {}", httpStatus);
         if (HttpStatusCodes.isSuccess(httpStatus)) {
           break;
@@ -160,8 +164,9 @@ public class LaunchLocalProcess extends DeploymentScript {
     UnauthenticatedApi unauthenticatedApi = new UnauthenticatedApi(apiClient);
     // call the unauthenticated status endpoint
     try {
-      unauthenticatedApi.serviceStatus();
-      int httpStatus = unauthenticatedApi.getApiClient().getStatusCode();
+      ApiResponse<RepositoryStatusModel> serviceStatusResponse =
+          unauthenticatedApi.serviceStatusWithHttpInfo();
+      int httpStatus = serviceStatusResponse.getStatusCode();
       statusRequestOK = HttpStatusCodes.isSuccess(httpStatus);
     } catch (Exception ex) {
       statusRequestOK = false;
