@@ -13,6 +13,8 @@ import bio.terra.model.DatasetRequestModel;
 import bio.terra.service.dataset.exception.DatasetLockException;
 import bio.terra.service.dataset.exception.DatasetNotFoundException;
 import bio.terra.service.profile.ProfileDao;
+import bio.terra.service.resourcemanagement.ResourceService;
+import bio.terra.service.resourcemanagement.google.GoogleBucketResource;
 import bio.terra.service.resourcemanagement.google.GoogleProjectResource;
 import bio.terra.service.resourcemanagement.google.GoogleResourceDao;
 import org.hamcrest.Matchers;
@@ -66,12 +68,44 @@ public class DatasetBucketDaoTest {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    private BillingProfileModel billingProfile;
-    private UUID projectId;
+    @Autowired
+    private ResourceService resourceService;
 
-    private UUID createDataset(DatasetRequestModel datasetRequest, String newName) throws Exception {
+    /*private BillingProfileModel billingProfile;
+    private UUID projectId;
+    private Dataset dataset;*/
+
+    private UUID datasetId;
+    private UUID bucketResourceId;
+
+    @Test
+    public void TestDatasetBucketLink() {
+        datasetId = UUID.randomUUID();
+        bucketResourceId = UUID.randomUUID();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // create again - this should increment
+        // count != 1, so this will fail - WHY?
+        // How do we get it out of this state of count > 1?
+
+
+        // decrement - link should still exist
+
+        // decrement again - link should no longer exist
+
+    }
+
+    /*private UUID createDataset(DatasetRequestModel datasetRequest, String newName) throws Exception {
         datasetRequest.name(newName).defaultProfileId(billingProfile.getId());
-        Dataset dataset = DatasetUtils.convertRequestWithGeneratedNames(datasetRequest);
+        dataset = DatasetUtils.convertRequestWithGeneratedNames(datasetRequest);
         dataset.projectResourceId(projectId);
         String createFlightId = UUID.randomUUID().toString();
         UUID datasetId = UUID.randomUUID();
@@ -109,11 +143,20 @@ public class DatasetBucketDaoTest {
         datasetIds.add(dataset1);
         datasetIds.add(dataset2);
         //TODO Add bucket link
+        UUID bulkIngestFlightId = UUID.randomUUID();
+        //What project is this going to grab? Should I call a lower level call?
+        /*GoogleBucketResource bucketForFile =
+            resourceService.getOrCreateBucketForFile(
+                dataset.getName(),
+                billingProfile,
+                bulkIngestFlightId.toString());
+
+
         // TODO Add manual calls to make links
 
 
 
         datasetDao.delete(dataset1);
         datasetDao.delete(dataset2);
-    }
+    }*/
 }
