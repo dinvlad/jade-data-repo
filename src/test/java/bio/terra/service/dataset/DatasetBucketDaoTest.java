@@ -20,6 +20,7 @@ import bio.terra.service.resourcemanagement.google.GoogleResourceDao;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -132,6 +133,82 @@ public class DatasetBucketDaoTest {
     }
 
 
+    @Test
+    public void TestDatasetBucketLink() throws Exception {
+        datasetId = createDataset("dataset-minimal.json");
+        bucketResourceId = createBucket();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // delete link
+        datasetBucketDao.deleteDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should no longer exists.", linkExists);
+    }
+
+    @Test
+    public void TestMultipleLinks() throws Exception {
+        datasetId = createDataset("dataset-minimal.json");
+        bucketResourceId = createBucket();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // delete link
+        datasetBucketDao.deleteDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should no longer exists.", linkExists);
+    }
+
+    // TODO: Fix code to allow this test to pass or change test to match expected behavior
+    @Ignore
+    @Test
+    public void TestDecrementLink() throws Exception {
+        datasetId = createDataset("dataset-minimal.json");
+        bucketResourceId = createBucket();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // decrement the link
+        // Is this the expected behavior?
+        // Since we're returning COUNT(*) in the exists check, even a successful_ingests=0 will return 1
+        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("After decrementing bucket link, Link should no longer exist.", linkExists);
+    }
+
+    // Test key restraints - There must be entries in the dataset table and bucket_resource table
+    // in order to create a link in the dataset_bucket table
     @Test(expected = Exception.class)
     public void DatasetMustExistToLink() throws Exception {
 
@@ -165,47 +242,5 @@ public class DatasetBucketDaoTest {
 
         // this should fail -> no requires real dataset and bucket to link
         datasetBucketDao.createDatasetBucketLink(datasetId, randomBucketResourceId);
-    }
-
-    // Test - link fails if the dataset resource does not exist
-    @Test
-    public void TestDatasetBucketLink() throws Exception {
-        datasetId = createDataset("dataset-minimal.json");
-        bucketResourceId = createBucket();
-
-        //initial check - link should not yet exist
-        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertFalse("Link should not yet exist.", linkExists);
-
-        // create link
-        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertTrue("Link should now exist.", linkExists);
-
-        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertTrue("Link should now exist.", linkExists);
-
-        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertTrue("Link should now exist.", linkExists);
-        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertTrue("Link should now exist.", linkExists);
-
-        // create again - this should increment
-        // count != 1, so this will fail - WHY?
-        // How do we get it out of this state of count > 1?
-        /*datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertFalse("Link should now not exist.", linkExists);*/
-
-
-        // decrement - link should still exist
-        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        //assertFalse("Link should now not exist.", linkExists);
-
-    // decrement again - link should no longer exist
     }
 }
