@@ -83,7 +83,7 @@ dependencies {
     implementation "org.broadinstitute.dsde.workbench:sam-client_2.12:${samClient}"
 
     // Terra Test Runner Library
-    implementation group: "bio.terra", name: "terra-test-runner", version: "0.0.1-20201110.134051-29"
+    implementation group: "bio.terra", name: "terra-test-runner", version: "0.0.1-20201117.221747-41"
 }
 
 group 'bio.terra'
