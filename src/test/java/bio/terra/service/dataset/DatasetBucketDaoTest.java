@@ -44,11 +44,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @Category(Unit.class)
 public class DatasetBucketDaoTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(DatasetBucketDaoTest.class);
 
     @Autowired
     private JsonLoader jsonLoader;
@@ -71,39 +76,15 @@ public class DatasetBucketDaoTest {
     @Autowired
     private ResourceService resourceService;
 
-    /*private BillingProfileModel billingProfile;
+    private BillingProfileModel billingProfile;
+    private GoogleBucketResource bucketForFile;
     private UUID projectId;
-    private Dataset dataset;*/
+    private Dataset dataset;
 
     private UUID datasetId;
     private UUID bucketResourceId;
 
-    @Test
-    public void TestDatasetBucketLink() {
-        datasetId = UUID.randomUUID();
-        bucketResourceId = UUID.randomUUID();
-
-        //initial check - link should not yet exist
-        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertFalse("Link should not yet exist.", linkExists);
-
-        // create link
-        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
-        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
-        assertTrue("Link should now exist.", linkExists);
-
-        // create again - this should increment
-        // count != 1, so this will fail - WHY?
-        // How do we get it out of this state of count > 1?
-
-
-        // decrement - link should still exist
-
-        // decrement again - link should no longer exist
-
-    }
-
-    /*private UUID createDataset(DatasetRequestModel datasetRequest, String newName) throws Exception {
+    private UUID createDataset(DatasetRequestModel datasetRequest, String newName) throws Exception {
         datasetRequest.name(newName).defaultProfileId(billingProfile.getId());
         dataset = DatasetUtils.convertRequestWithGeneratedNames(datasetRequest);
         dataset.projectResourceId(projectId);
@@ -115,6 +96,16 @@ public class DatasetBucketDaoTest {
         return datasetId;
     }
 
+    private UUID createBucket() throws InterruptedException {
+        String ingestFileFlightId = UUID.randomUUID().toString();
+        bucketForFile =
+            resourceService.getOrCreateBucketForFile(
+                dataset.getName(),
+                billingProfile,
+                ingestFileFlightId);
+        return bucketForFile.getResourceId();
+    }
+
     private UUID createDataset(String datasetFile) throws Exception  {
         DatasetRequestModel datasetRequest = jsonLoader.loadObject(datasetFile, DatasetRequestModel.class);
         return createDataset(datasetRequest, datasetRequest.getName() + UUID.randomUUID().toString());
@@ -122,41 +113,99 @@ public class DatasetBucketDaoTest {
 
     @Before
     public void setup() {
+        logger.info("-------------------Setup----------------------");
         BillingProfileRequestModel profileRequest = ProfileFixtures.randomBillingProfileRequest();
         billingProfile = profileDao.createBillingProfile(profileRequest, "hi@hi.hi");
 
         GoogleProjectResource projectResource = ResourceFixtures.randomProjectResource(billingProfile);
         projectId = resourceDao.createProject(projectResource);
+        logger.info("-------------------Test----------------------");
     }
 
     @After
     public void teardown() {
+        logger.info("-------------------Cleanup----------------------");
+        datasetBucketDao.deleteDatasetBucketLink(datasetId, bucketResourceId);
+        datasetDao.delete(datasetId);
         resourceDao.deleteProject(projectId);
         profileDao.deleteBillingProfileById(UUID.fromString(billingProfile.getId()));
     }
 
+
+    @Test(expected = Exception.class)
+    public void DatasetMustExistToLink() throws Exception {
+
+        // create dataset to pass to bucket create
+        datasetId = createDataset("dataset-minimal.json");
+        bucketResourceId = createBucket();
+
+        // fake datasetId
+        UUID randomDatasetId = UUID.randomUUID();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(randomDatasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // this should fail -> no requires real dataset and bucket to link
+        datasetBucketDao.createDatasetBucketLink(randomDatasetId, bucketResourceId);
+    }
+
+    @Test(expected = Exception.class)
+    public void BucketMustExistToLink() throws Exception {
+
+        // create dataset
+        datasetId = createDataset("dataset-minimal.json");
+
+        // fake datasetId
+        UUID randomBucketResourceId= UUID.randomUUID();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, randomBucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // this should fail -> no requires real dataset and bucket to link
+        datasetBucketDao.createDatasetBucketLink(datasetId, randomBucketResourceId);
+    }
+
+    // Test - link fails if the dataset resource does not exist
     @Test
-    public void CompareBuckets() throws Exception {
-        UUID dataset1 = createDataset("dataset-minimal.json");
-        UUID dataset2 = createDataset("dataset-create-test.json");
-        List<UUID> datasetIds = new ArrayList<>();
-        datasetIds.add(dataset1);
-        datasetIds.add(dataset2);
-        //TODO Add bucket link
-        UUID bulkIngestFlightId = UUID.randomUUID();
-        //What project is this going to grab? Should I call a lower level call?
-        /*GoogleBucketResource bucketForFile =
-            resourceService.getOrCreateBucketForFile(
-                dataset.getName(),
-                billingProfile,
-                bulkIngestFlightId.toString());
+    public void TestDatasetBucketLink() throws Exception {
+        datasetId = createDataset("dataset-minimal.json");
+        bucketResourceId = createBucket();
+
+        //initial check - link should not yet exist
+        boolean linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should not yet exist.", linkExists);
+
+        // create link
+        datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertTrue("Link should now exist.", linkExists);
+
+        // create again - this should increment
+        // count != 1, so this will fail - WHY?
+        // How do we get it out of this state of count > 1?
+        /*datasetBucketDao.createDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        assertFalse("Link should now not exist.", linkExists);*/
 
 
-        // TODO Add manual calls to make links
+        // decrement - link should still exist
+        datasetBucketDao.decrementDatasetBucketLink(datasetId, bucketResourceId);
+        linkExists = datasetBucketDao.datasetBucketLinkExists(datasetId, bucketResourceId);
+        //assertFalse("Link should now not exist.", linkExists);
 
-
-
-        datasetDao.delete(dataset1);
-        datasetDao.delete(dataset2);
-    }*/
+    // decrement again - link should no longer exist
+    }
 }
