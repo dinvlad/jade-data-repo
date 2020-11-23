@@ -74,6 +74,10 @@ public class ProfileDao {
             .createdDate(keyHolder.getTimestamp("created_date").toInstant().toString());
     }
 
+    //Q: What would the input for this be? profileId? projectid?
+    // We want to allow for multiple projects for one billing account
+    //add update method here
+
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     public EnumerateBillingProfileModel enumerateBillingProfiles(
         int offset,

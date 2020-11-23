@@ -85,6 +85,14 @@ public class ProfileApiController implements ResourcesApi {
     }
 
     @Override
+    public ResponseEntity<JobModel> updateProfile(
+        @RequestBody BillingProfileRequestModel billingProfileRequest) {
+        AuthenticatedUserRequest user = authenticatedUserRequestFactory.from(request);
+        String jobId = profileService.createProfile(billingProfileRequest, user);
+        return jobToResponse(jobService.retrieveJob(jobId, user));
+    }
+
+    @Override
     public ResponseEntity<JobModel> deleteProfile(String id) {
         AuthenticatedUserRequest user = authenticatedUserRequestFactory.from(request);
         String jobId = profileService.deleteProfile(id, user);
