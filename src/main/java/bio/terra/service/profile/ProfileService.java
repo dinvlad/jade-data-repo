@@ -23,6 +23,7 @@ import bio.terra.service.resourcemanagement.exception.InaccessibleBillingAccount
 import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import bio.terra.service.snapshot.flight.UnlockSnapshotStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 public class ProfileService {
     private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
 
+    private static Logger logger = LoggerFactory.getLogger(ProfileService.class);
     private final ProfileDao profileDao;
     private final IamService iamService;
     private final JobService jobService;
@@ -77,6 +79,16 @@ public class ProfileService {
         return jobService
             .newJob(description, ProfileCreateFlight.class, billingProfileRequest, user)
             .submit();
+    }
+
+    public String updateProfile(String billingProfileId,
+                                BillingProfileRequestModel billingProfileRequest,
+                                AuthenticatedUserRequest user) {
+        String description = String.format("Create billing profile '%s'", billingProfileRequest.getProfileName());
+        logger.info("[UPDATE PROFILE]: {}", description);
+        /*return jobService
+            .newJob(description, ProfileUpdateFlight.class, )*/
+        return "hello";
     }
 
     /**
