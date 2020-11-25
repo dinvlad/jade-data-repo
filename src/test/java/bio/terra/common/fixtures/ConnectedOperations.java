@@ -211,8 +211,8 @@ public class ConnectedOperations {
         return TestUtils.mapFromJson(result.getResponse().getContentAsString(), BillingProfileModel.class);
     }
 
-    public int updateProfile(String profileId, BillingProfileRequestModel profileRequestModel) throws Exception {
-        MvcResult result = mvc.perform(put("/api/resources/v1/profiles/" + profileId)
+    public int updateProfile(BillingProfileRequestModel profileRequestModel) throws Exception {
+        MvcResult result = mvc.perform(put("/api/resources/v1/profiles")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtils.mapToJson(profileRequestModel)))
             .andReturn();

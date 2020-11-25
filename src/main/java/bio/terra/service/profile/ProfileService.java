@@ -81,8 +81,7 @@ public class ProfileService {
             .submit();
     }
 
-    public String updateProfile(String billingProfileId,
-                                BillingProfileRequestModel billingProfileRequest,
+    public String updateProfile(BillingProfileRequestModel billingProfileRequest,
                                 AuthenticatedUserRequest user) {
         String description = String.format("Create billing profile '%s'", billingProfileRequest.getProfileName());
         logger.info("[UPDATE PROFILE]: {}", description);

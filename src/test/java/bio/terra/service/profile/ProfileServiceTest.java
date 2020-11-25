@@ -111,9 +111,9 @@ public class ProfileServiceTest {
         // ==========THING TESTED FOR THIS PR=============
         BillingProfileRequestModel profileRequestModel = ProfileFixtures.randomBillingProfileRequest()
             .billingAccountId("00708C-45D19D-27AAFA");
-        int status = connectedOperations.updateProfile(profile.getId(), profileRequestModel);
+        int status = connectedOperations.updateProfile(profileRequestModel);
         System.out.println("UpdateProfile Status: " + status);
-        assertThat("Status should be 200", status, equalTo(200));
+        assertThat("Status should be 202", status, equalTo(202));
         // ==========THING TESTED FOR THIS PR=============
     }
 
