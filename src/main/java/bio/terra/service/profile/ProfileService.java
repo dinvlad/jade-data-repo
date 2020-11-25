@@ -8,8 +8,6 @@ import bio.terra.model.PolicyModel;
 import bio.terra.model.UpgradeModel;
 import bio.terra.model.UpgradeResponseModel;
 import bio.terra.service.iam.AuthenticatedUserRequest;
-import bio.terra.service.iam.IamAction;
-import bio.terra.service.iam.IamResourceType;
 import bio.terra.service.iam.IamService;
 import bio.terra.service.iam.exception.IamNotFoundException;
 import bio.terra.service.iam.exception.IamUnauthorizedException;
@@ -127,12 +125,14 @@ public class ProfileService {
                                                           Integer limit,
                                                           AuthenticatedUserRequest user) {
         // TODO: add back once spend profile fully implemented
-
+        /*
         List<UUID> resources = iamService.listAuthorizedResources(user, IamResourceType.SPEND_PROFILE);
         if (resources.isEmpty()) {
             return new EnumerateBillingProfileModel().total(0);
         }
         return profileDao.enumerateBillingProfiles(offset, limit, resources);
+        */
+        return new EnumerateBillingProfileModel().total(0);
     }
 
     /**
@@ -146,11 +146,11 @@ public class ProfileService {
      */
     public BillingProfileModel getProfileById(String id, AuthenticatedUserRequest user) {
         // TODO: add back once spend profile fully implemented
-
+        /*
         if (!iamService.hasActions(user, IamResourceType.SPEND_PROFILE, id)) {
             throw new IamUnauthorizedException("unauthorized");
         }
-
+        */
 
         return getProfileByIdNoCheck(id);
     }
@@ -183,11 +183,12 @@ public class ProfileService {
      */
     public BillingProfileModel authorizeLinking(UUID profileId, AuthenticatedUserRequest user) {
         // TODO: Add this back in once we have way to authorize w/ existing billing profiles
+        /*
         iamService.verifyAuthorization(user,
             IamResourceType.SPEND_PROFILE,
             profileId.toString(),
             IamAction.LINK);
-
+        */
         BillingProfileModel profileModel = profileDao.getBillingProfileById(profileId);
 
         // TODO: check bill account usable and validate delegation path
