@@ -17,6 +17,7 @@ import bio.terra.service.profile.exception.ProfileNotFoundException;
 import bio.terra.service.profile.flight.ProfileMapKeys;
 import bio.terra.service.profile.flight.create.ProfileCreateFlight;
 import bio.terra.service.profile.flight.delete.ProfileDeleteFlight;
+import bio.terra.service.profile.flight.update.ProfileUpdateFlight;
 import bio.terra.service.profile.google.GoogleBillingService;
 import bio.terra.service.resourcemanagement.exception.InaccessibleBillingAccountException;
 import org.broadinstitute.dsde.workbench.client.sam.ApiException;
@@ -85,9 +86,9 @@ public class ProfileService {
                                 AuthenticatedUserRequest user) {
         String description = String.format("Create billing profile '%s'", billingProfileRequest.getProfileName());
         logger.info("[UPDATE PROFILE]: {}", description);
-        /*return jobService
-            .newJob(description, ProfileUpdateFlight.class, )*/
-        return "hello";
+        return jobService
+            .newJob(description, ProfileUpdateFlight.class, billingProfileRequest, user)
+            .submit();
     }
 
     /**
