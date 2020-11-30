@@ -4,6 +4,8 @@ import bio.terra.service.iam.AuthenticatedUserRequest;
 import bio.terra.service.job.JobMapKeys;
 import bio.terra.service.profile.ProfileService;
 import bio.terra.service.profile.flight.ProfileMapKeys;
+import bio.terra.service.profile.flight.create.CreateProfileMetadataStep;
+import bio.terra.service.profile.flight.create.CreateProfileVerifyAccountStep;
 import bio.terra.service.resourcemanagement.ResourceService;
 import bio.terra.stairway.Flight;
 import bio.terra.stairway.FlightMap;
@@ -22,6 +24,11 @@ public class ProfileUpdateFlight extends Flight {
 
         AuthenticatedUserRequest user = inputParameters.get(
             JobMapKeys.AUTH_USER_INFO.getKeyName(), AuthenticatedUserRequest.class);
+
+        //update billing account id metadata
+        addStep(new UpdateProfileMetadataStep(profileService, request, user));
+        //update
+        addStep(new UpdateProfileVerifyAccountStep(profileService, request, user));
     }
 
 }
