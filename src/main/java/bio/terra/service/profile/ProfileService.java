@@ -8,6 +8,7 @@ import bio.terra.model.PolicyModel;
 import bio.terra.model.UpgradeModel;
 import bio.terra.model.UpgradeResponseModel;
 import bio.terra.service.iam.AuthenticatedUserRequest;
+import bio.terra.service.iam.IamAction;
 import bio.terra.service.iam.IamService;
 import bio.terra.service.iam.exception.IamNotFoundException;
 import bio.terra.service.iam.exception.IamUnauthorizedException;
@@ -81,8 +82,34 @@ public class ProfileService {
             .submit();
     }
 
-    public String updateProfile(BillingProfileRequestModel billingProfileRequest,
+    /**
+     * Update billing profile. We make the following checks:
+     * <ul>
+     *     <le>The service must have proper permissions on the google billing account</le>
+     *     <le>The caller must have billing.resourceAssociation.create permission on the google billing account</le>
+     *     <le>The google billing account must be enabled</le>
+     * </ul>
+     * <p>
+     * The billing profile name does not need to be unique across all billing profiles.
+     * The billing profile id needs to be a valid and existing profile
+     * </p>
+     *
+     * @param  id the UUID for the billing profile to be updated
+     * @param  billingProfileRequest request with changes to billing profile
+     * @param user the user attempting the delete
+     * @return jobId of the submitted stairway job
+     */
+    public String updateProfile(String id,
+                                BillingProfileRequestModel billingProfileRequest,
                                 AuthenticatedUserRequest user) {
+        // TODO: Make sure SAM check is right - UPDATE_BILLING_ACCOUNT is the newly added action for billing profile
+        // or should I be updating the SAM profile? Update_metadata action?
+        // TODO: add back once spend profile fully implemented
+        /*
+        iamService.verifyAuthorization(user, IamResourceType.SPEND_PROFILE, id, IamAction.UPDATE_BILLING_ACCOUNT);
+         */
+
+
         String description = String.format("Create billing profile '%s'", billingProfileRequest.getProfileName());
         logger.info("[UPDATE PROFILE]: {}", description);
         return jobService
