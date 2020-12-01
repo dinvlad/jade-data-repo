@@ -27,7 +27,7 @@ public class ProfileUpdateFlight extends Flight {
 
         //update billing account id metadata
         addStep(new UpdateProfileMetadataStep(profileService, request, user));
-        //update
+        // Make sure valid account before changing in gcloud project
         addStep(new UpdateProfileVerifyAccountStep(profileService, request, user));
     }
 

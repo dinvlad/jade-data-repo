@@ -295,6 +295,36 @@ public class SamIam implements IamProviderInterface {
     }
 
     @Override
+    public void updateProfileResource(AuthenticatedUserRequest userReq, String profileId) throws InterruptedException {
+        SamRetry samRetry = new SamRetry(configurationService);
+        samRetry.perform(() -> updateProfileResourceInner(userReq, profileId));
+    }
+
+    private Void updateProfileResourceInner(AuthenticatedUserRequest userReq,
+                                            bio.terra.model.BillingProfileRequestModel requestModel)
+        throws ApiException {
+        ResourcesApi samResourceApi = samResourcesApi(userReq.getRequiredToken());
+        logger.debug("SAM request: " + userReq.toString());
+        AccessPolicyMembership result =
+            samResourceApi.getPolicy(IamResourceType.SPEND_PROFILE.toString(), requestModel.getId());
+
+        CreateResourceCorrectRequest req = new CreateResourceCorrectRequest();
+        req.setResourceId(profileId);
+        req.addPoliciesItem(
+            IamRole.OWNER.toString(),
+            createAccessPolicyOne(IamRole.OWNER, userReq.getEmail()));
+        req.addPoliciesItem(
+            IamRole.USER.toString(),
+            createAccessPolicy(IamRole.USER, null));
+
+        ResourcesApi samResourceApi = samResourcesApi(userReq.getRequiredToken());
+        logger.debug("SAM request: " + req.toString());
+
+        createResourceCorrectCall(samResourceApi.getApiClient(), IamResourceType.SPEND_PROFILE.toString(), req);
+        return null;
+    }
+
+    @Override
     public void deleteProfileResource(AuthenticatedUserRequest userReq, String profileId)
         throws InterruptedException {
         deleteResource(userReq, IamResourceType.SPEND_PROFILE, profileId.toString());

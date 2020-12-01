@@ -208,6 +208,14 @@ public class IamService {
         }
     }
 
+    public void updateProfileResource(AuthenticatedUserRequest userReq, String profileId) {
+        try {
+            iamProvider.updateProfileResource(userReq, profileId);
+        } catch (InterruptedException ex) {
+            throw new IamUnavailableException("service unavailable");
+        }
+    }
+
     public void deleteProfileResource(AuthenticatedUserRequest userReq, String profileId) {
         try {
             iamProvider.deleteProfileResource(userReq, profileId);
