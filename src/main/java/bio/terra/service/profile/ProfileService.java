@@ -263,6 +263,10 @@ public class ProfileService {
         return profileDao.createBillingProfile(profileRequest, user.getEmail());
     }
 
+    public BillingProfileModel updateProfileMetadata(BillingProfileRequestModel profileRequest) {
+        return profileDao.updateBillingProfileById(profileRequest);
+    }
+
     public boolean deleteProfileMetadata(String profileId) {
         // TODO: refuse to delete if there are dependent projects
         UUID profileUuid = UUID.fromString(profileId);

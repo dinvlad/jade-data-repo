@@ -9,6 +9,7 @@ import bio.terra.stairway.FlightContext;
 import bio.terra.stairway.FlightMap;
 import bio.terra.stairway.Step;
 import bio.terra.stairway.StepResult;
+import com.google.cloud.bigquery.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,13 @@ public class UpdateProfileMetadataStep implements Step {
 
     @Override
     public StepResult doStep(FlightContext context) {
-        BillingProfileModel profileModel = profileService.createProfileMetadata(profileRequest, user);
+        // get current billing model so we know what to revert to
+        BillingProfileModel oldProfileModel = profileService.getProfileById(profileRequest.getId(), user);
         FlightMap workingMap = context.getWorkingMap();
+        workingMap.put(JobMapKeys.REVERT_TO.getKeyName(), oldProfileModel);
+
+        // Update to new billing metadata
+        BillingProfileModel profileModel = profileService.updateProfileMetadata(profileRequest);
         workingMap.put(JobMapKeys.RESPONSE.getKeyName(), profileModel);
         workingMap.put(JobMapKeys.STATUS_CODE.getKeyName(), HttpStatus.CREATED);
         return StepResult.getStepResultSuccess();
@@ -39,8 +45,17 @@ public class UpdateProfileMetadataStep implements Step {
 
     @Override
     public StepResult undoStep(FlightContext context) {
-        logger.debug("Profile creation failed. Deleting metadata.");
-        profileService.deleteProfileMetadata(profileRequest.getId());
+        logger.info("Profile update failed. Reverting to old profile metadata.");
+        FlightMap workingMap = context.getWorkingMap();
+        BillingProfileModel oldProfileModel =
+            workingMap.get(JobMapKeys.REVERT_TO.getKeyName(), BillingProfileModel.class);
+        BillingProfileRequestModel requestOldModel = new BillingProfileRequestModel()
+            .id(oldProfileModel.getId())
+            .biller(oldProfileModel.getBiller())
+            .billingAccountId(oldProfileModel.getBillingAccountId())
+            .description(oldProfileModel.getDescription())
+            .profileName(oldProfileModel.getProfileName());
+        profileService.updateProfileMetadata(requestOldModel);
         return StepResult.getStepResultSuccess();
     }
 }
