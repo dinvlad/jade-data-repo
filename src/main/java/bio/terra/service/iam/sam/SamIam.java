@@ -4,6 +4,7 @@ import bio.terra.common.exception.DataRepoException;
 import bio.terra.model.PolicyModel;
 import bio.terra.model.UserStatusInfo;
 import bio.terra.model.RepositoryStatusModelSystems;
+import bio.terra.model.BillingProfileRequestModel;
 import bio.terra.service.configuration.ConfigurationService;
 import bio.terra.service.iam.AuthenticatedUserRequest;
 import bio.terra.service.iam.IamAction;
@@ -295,15 +296,17 @@ public class SamIam implements IamProviderInterface {
     }
 
     @Override
-    public void updateProfileResource(AuthenticatedUserRequest userReq, String profileId) throws InterruptedException {
+    public void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel requestModel) throws InterruptedException {
         SamRetry samRetry = new SamRetry(configurationService);
-        samRetry.perform(() -> updateProfileResourceInner(userReq, profileId));
+        samRetry.perform(() -> updateProfileResourceInner(userReq, requestModel));
     }
 
     private Void updateProfileResourceInner(AuthenticatedUserRequest userReq,
-                                            bio.terra.model.BillingProfileRequestModel requestModel)
+                                            BillingProfileRequestModel requestModel)
         throws ApiException {
-        ResourcesApi samResourceApi = samResourcesApi(userReq.getRequiredToken());
+        return null;
+        // TODO implement this. I think we want to be able to update the description... and maybe name of the resource?
+        /*ResourcesApi samResourceApi = samResourcesApi(userReq.getRequiredToken());
         logger.debug("SAM request: " + userReq.toString());
         AccessPolicyMembership result =
             samResourceApi.getPolicy(IamResourceType.SPEND_PROFILE.toString(), requestModel.getId());
@@ -322,6 +325,7 @@ public class SamIam implements IamProviderInterface {
 
         createResourceCorrectCall(samResourceApi.getApiClient(), IamResourceType.SPEND_PROFILE.toString(), req);
         return null;
+        */
     }
 
     @Override

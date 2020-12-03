@@ -14,8 +14,8 @@ public class UpdateProfileVerifyAccountStep implements Step {
     private final AuthenticatedUserRequest user;
 
     public UpdateProfileVerifyAccountStep(ProfileService profileService,
-                                          BillingProfileRequestModel request,
-                                          AuthenticatedUserRequest user) {
+                                      BillingProfileRequestModel request,
+                                      AuthenticatedUserRequest user) {
         this.profileService = profileService;
         this.request = request;
         this.user = user;

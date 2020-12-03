@@ -29,6 +29,10 @@ public class ProfileUpdateFlight extends Flight {
         addStep(new UpdateProfileMetadataStep(profileService, request, user));
         // Make sure valid account before changing in gcloud project
         addStep(new UpdateProfileVerifyAccountStep(profileService, request, user));
+        // Update SAM resource //TODO
+        addStep(new UpdateProfileAuthzIamStep(profileService, request, user));
+        // Update billing profile in gcloud project
+        addStep(new UpdateProfileUpdateGCloudProject(profileService, request, user));
     }
 
 }

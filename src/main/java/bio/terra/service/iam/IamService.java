@@ -2,6 +2,7 @@ package bio.terra.service.iam;
 
 import bio.terra.model.PolicyModel;
 import bio.terra.model.UserStatusInfo;
+import bio.terra.model.BillingProfileRequestModel;
 import bio.terra.service.configuration.ConfigurationService;
 import bio.terra.service.iam.exception.IamUnauthorizedException;
 import bio.terra.service.iam.exception.IamUnavailableException;
@@ -208,9 +209,9 @@ public class IamService {
         }
     }
 
-    public void updateProfileResource(AuthenticatedUserRequest userReq, String profileId) {
+    public void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel requestModel) {
         try {
-            iamProvider.updateProfileResource(userReq, profileId);
+            iamProvider.updateProfileResource(userReq, requestModel);
         } catch (InterruptedException ex) {
             throw new IamUnavailableException("service unavailable");
         }
