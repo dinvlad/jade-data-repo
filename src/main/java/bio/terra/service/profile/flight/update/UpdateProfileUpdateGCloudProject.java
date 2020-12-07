@@ -53,7 +53,7 @@ public class UpdateProfileUpdateGCloudProject implements Step {
 
     @Override
     public StepResult undoStep(FlightContext context) throws InterruptedException {
-        // Verify account has no side effects to clean up
+        //TODO: Revert project id change
         return StepResult.getStepResultSuccess();
     }
 }
