@@ -8,7 +8,6 @@ import bio.terra.model.PolicyModel;
 import bio.terra.model.UpgradeModel;
 import bio.terra.model.UpgradeResponseModel;
 import bio.terra.service.iam.AuthenticatedUserRequest;
-import bio.terra.service.iam.IamAction;
 import bio.terra.service.iam.IamService;
 import bio.terra.service.iam.exception.IamNotFoundException;
 import bio.terra.service.iam.exception.IamUnauthorizedException;
@@ -94,13 +93,11 @@ public class ProfileService {
      * The billing profile id needs to be a valid and existing profile
      * </p>
      *
-     * @param  id the UUID for the billing profile to be updated
      * @param  billingProfileRequest request with changes to billing profile
      * @param user the user attempting the delete
      * @return jobId of the submitted stairway job
      */
-    public String updateProfile(String id,
-                                BillingProfileRequestModel billingProfileRequest,
+    public String updateProfile(BillingProfileRequestModel billingProfileRequest,
                                 AuthenticatedUserRequest user) {
         // TODO: Make sure SAM check is right - UPDATE_BILLING_ACCOUNT is the newly added action for billing profile
         // or should I be updating the SAM profile? Update_metadata action?

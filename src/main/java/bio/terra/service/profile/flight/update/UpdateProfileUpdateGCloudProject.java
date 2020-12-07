@@ -23,9 +23,9 @@ public class UpdateProfileUpdateGCloudProject implements Step {
 
     @Override
     public StepResult doStep(FlightContext context) throws InterruptedException {
-        // Check if billing profile id is diff from exisiting
+        // Check if billing profile id is diff from existing
         // if yes
-            // use GoogleProjectSErvice new method to update billing account
+            // use GoogleProjectService new method to update billing account
         // if no
             // log message
 

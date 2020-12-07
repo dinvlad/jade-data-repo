@@ -296,7 +296,8 @@ public class SamIam implements IamProviderInterface {
     }
 
     @Override
-    public void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel requestModel) throws InterruptedException {
+    public void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel requestModel)
+        throws InterruptedException {
         SamRetry samRetry = new SamRetry(configurationService);
         samRetry.perform(() -> updateProfileResourceInner(userReq, requestModel));
     }

@@ -122,7 +122,8 @@ public interface IamProviderInterface {
      * @param userReq   authenticated user
      * @param billingProfileRequestModel updated billing profile
      */
-    void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel billingProfileRequestModel) throws InterruptedException;
+    void updateProfileResource(AuthenticatedUserRequest userReq, BillingProfileRequestModel billingProfileRequestModel)
+        throws InterruptedException;
 
     /**
      * Delete a spend profile IAM resource

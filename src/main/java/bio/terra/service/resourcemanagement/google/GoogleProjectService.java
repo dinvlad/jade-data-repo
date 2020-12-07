@@ -1,6 +1,7 @@
 package bio.terra.service.resourcemanagement.google;
 
 import bio.terra.model.BillingProfileModel;
+import bio.terra.model.BillingProfileRequestModel;
 import bio.terra.service.configuration.ConfigurationService;
 import bio.terra.service.iam.AuthenticatedUserRequest;
 import bio.terra.service.profile.google.GoogleBillingService;
@@ -464,8 +465,8 @@ public class GoogleProjectService {
     }
 
 
-    public void updateBillingProfile(bio.terra.model.BillingProfileRequestModel request, AuthenticatedUserRequest user) {
-
+    public void updateBillingProfile(BillingProfileRequestModel request, AuthenticatedUserRequest user) {
+        logger.info("TODO: GoogleProjectService.updateBillingProfile");
         //billingService.assignProjectBilling(billingProfile, googleProjectResource);
     }
 }
