@@ -3,6 +3,7 @@ package bio.terra.service.profile.flight.update;
 import bio.terra.service.iam.AuthenticatedUserRequest;
 import bio.terra.service.job.JobMapKeys;
 import bio.terra.service.profile.ProfileService;
+import bio.terra.service.resourcemanagement.google.GoogleProjectService;
 import bio.terra.stairway.Flight;
 import bio.terra.stairway.FlightMap;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +15,8 @@ public class ProfileUpdateFlight extends Flight {
 
         ApplicationContext appContext = (ApplicationContext) applicationContext;
         ProfileService profileService = (ProfileService) appContext.getBean("profileService");
+        GoogleProjectService googleProjectService =
+            (GoogleProjectService) appContext.getBean("googleProjectService");
 
         bio.terra.model.BillingProfileRequestModel request =
             inputParameters.get(JobMapKeys.REQUEST.getKeyName(), bio.terra.model.BillingProfileRequestModel.class);
@@ -28,7 +31,7 @@ public class ProfileUpdateFlight extends Flight {
         // Update SAM resource //TODO
         addStep(new UpdateProfileAuthzIamStep(profileService, request, user));
         // Update billing profile in gcloud project
-        addStep(new UpdateProfileUpdateGCloudProject(profileService, request, user));
+        addStep(new UpdateProfileUpdateGCloudProject(profileService, googleProjectService, request, user));
     }
 
 }

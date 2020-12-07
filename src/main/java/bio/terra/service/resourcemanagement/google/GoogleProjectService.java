@@ -466,6 +466,7 @@ public class GoogleProjectService {
 
 
     public void updateBillingProfile(BillingProfileRequestModel request, AuthenticatedUserRequest user) {
+
         logger.info("TODO: GoogleProjectService.updateBillingProfile");
         //billingService.assignProjectBilling(billingProfile, googleProjectResource);
     }
