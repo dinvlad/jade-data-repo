@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 public class ProfileService {
     private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
 
-    private static Logger logger = LoggerFactory.getLogger(ProfileService.class);
     private final ProfileDao profileDao;
     private final IamService iamService;
     private final JobService jobService;
