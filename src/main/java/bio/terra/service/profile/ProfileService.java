@@ -8,6 +8,7 @@ import bio.terra.model.PolicyModel;
 import bio.terra.model.UpgradeModel;
 import bio.terra.model.UpgradeResponseModel;
 import bio.terra.service.iam.AuthenticatedUserRequest;
+import bio.terra.service.iam.IamResourceType;
 import bio.terra.service.iam.IamService;
 import bio.terra.service.iam.exception.IamNotFoundException;
 import bio.terra.service.iam.exception.IamUnauthorizedException;
@@ -23,7 +24,6 @@ import bio.terra.service.resourcemanagement.exception.InaccessibleBillingAccount
 import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import bio.terra.service.snapshot.flight.UnlockSnapshotStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -274,7 +274,7 @@ public class ProfileService {
     }
 
     public void updateProfileIamResource(BillingProfileRequestModel request, AuthenticatedUserRequest user) {
-        iamService.updateProfileResource(user, request.getId());
+        iamService.updateProfileResource(user, request);
     }
 
     public void deleteProfileIamResource(String profileId, AuthenticatedUserRequest user) {
