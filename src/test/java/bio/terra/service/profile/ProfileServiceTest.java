@@ -80,11 +80,17 @@ public class ProfileServiceTest {
     private List<String> bucketNames;
     private boolean allowReuseExistingBuckets;
     private GoogleProjectResource projectResource;
+    private String oldBillingAccountId;
+    private String newBillingAccountId;
+
 
     @Before
     public void setup() throws Exception {
         System.out.println("================== SETUP ===================");
-        profile = connectedOperations.createProfileForAccount(testConfig.getGoogleBillingAccountId());
+        oldBillingAccountId = testConfig.getGoogleBillingAccountId();
+        newBillingAccountId = testConfig.getSecondGoogleBillingAccountId();
+
+        profile = connectedOperations.createProfileForAccount(oldBillingAccountId);
         connectedOperations.stubOutSamCalls(samService);
         storage = StorageOptions.getDefaultInstance().getService();
         bucketNames = new ArrayList<>();
@@ -109,11 +115,23 @@ public class ProfileServiceTest {
         System.out.println("Retrieve Profile: " + model.getProfileName());
 
         // ==========THING TESTED FOR THIS PR=============
-        BillingProfileRequestModel profileRequestModel = ProfileFixtures.randomBillingProfileRequest()
-            .billingAccountId("00708C-45D19D-27AAFA");
-        int status = connectedOperations.updateProfile(profileRequestModel);
-        System.out.println("UpdateProfile Status: " + status);
-        assertThat("Status should be 202", status, equalTo(202));
+        BillingProfileRequestModel updatedRequest = new BillingProfileRequestModel()
+            .billingAccountId(newBillingAccountId)
+            .biller("direct")
+            .description("updated profile")
+            .id(profile.getId())
+            .profileName(profile.getProfileName() + "-updated");
+        // TODO: Can the profile name change? Since we create a project that is tied between the two, I don't think so.
+        // probably should create new "BillingProfileUpdateRequestModel" that just allow changes to billing account id
+        // and description?
+
+        // This just submits the update profile job
+        BillingProfileModel newModel = connectedOperations.updateProfile(updatedRequest);
+        logger.info("Updated model: {}", newModel.toString());
+        assertThat("Billing account should be equal to the newBillingAccountId",
+            newModel.getBillingAccountId(),
+            equalTo(newBillingAccountId));
+
         // ==========THING TESTED FOR THIS PR=============
     }
 
