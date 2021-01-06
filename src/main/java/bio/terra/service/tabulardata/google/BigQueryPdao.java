@@ -20,6 +20,7 @@ import bio.terra.service.dataset.Dataset;
 import bio.terra.service.dataset.DatasetTable;
 import bio.terra.service.dataset.exception.IngestFailureException;
 import bio.terra.service.dataset.exception.IngestFileNotFoundException;
+import bio.terra.service.dataset.exception.TableNotFoundException;
 import bio.terra.service.filedata.google.bq.BigQueryConfiguration;
 import bio.terra.service.snapshot.RowIdMatch;
 import bio.terra.service.snapshot.Snapshot;
@@ -54,6 +55,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.bigquery.ViewDefinition;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1596,6 +1598,84 @@ public class BigQueryPdao {
             rowCounts.put(tableName, getSingleLongValue(result));
         }
         return rowCounts;
+    }
+
+    // we select from the live view here so that rows that have been hard deleted are not returned
+    private static final String rowSelectionTemplate = "SELECT <columns> FROM `<project>.<dataset>.<table>`";
+
+    public List<Map<String, Object>> getSnapshotTableData(Snapshot snapshot,
+                                                          String tableName) throws InterruptedException {
+        final BigQueryProject bigQueryProject = bigQueryProjectForSnapshot(snapshot);
+        final SnapshotTable snapshotTable = snapshot.getTables()
+            .stream()
+            .filter(t -> Objects.equals(t.getName(), tableName))
+            .findAny()
+            .orElseThrow(() -> new TableNotFoundException("Snapshot table wasn't found"));
+
+        final List<Column> columns = snapshotTable.getColumns();
+        columns.add(new Column()
+            .name("datarepo_row_id")
+            .type("string")
+            .table(snapshotTable)
+            .arrayOf(false)
+        );
+        final String sql = new ST(rowSelectionTemplate)
+            .add("columns", columns.stream().map(Column::getName).collect(Collectors.joining(",")))
+            .add("project", bigQueryProject.getProjectId())
+            .add("dataset", snapshot.getName())
+            .add("table", tableName)
+            .render();
+
+        TableResult result = bigQueryProject.query(sql);
+        final List<Map<String, Object>> values = new ArrayList<>();
+        result.iterateAll().forEach(v -> values.add(
+            columns.stream()
+                .map(c -> Pair.of(c.getName(), Optional.ofNullable(extractValue(v.get(c.getName()), c, true))))
+                .filter(p -> p.getValue().isPresent())
+                .collect(Collectors.toMap(
+                    Pair::getKey,
+                    p -> p.getValue().get()
+                ))
+        ));
+        return values;
+    }
+
+    private Object extractValue(final FieldValue value, final Column column, final boolean explodeArray) {
+        final LegacySQLTypeName legacySQLTypeName =
+            translateType(Optional.ofNullable(column.getType()).orElse("string"));
+        if (value == null) {
+            return null;
+        }
+        if (explodeArray && column.isArrayOf()) {
+            return value.getRepeatedValue().stream()
+                .map(v -> extractValue(v, column, false))
+                .collect(Collectors.toList());
+        }
+        if (legacySQLTypeName.equals(LegacySQLTypeName.STRING)) {
+            return value.isNull() ? null : value.getStringValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.BOOLEAN)) {
+            return value.isNull() ? null : value.getBooleanValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.DATE)) {
+            return value.isNull() ? null : value.getStringValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.DATETIME)) {
+            return value.isNull() ? null : value.getStringValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.FLOAT)) {
+            return value.isNull() ? null : value.getDoubleValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.INTEGER)) {
+            return value.isNull() ? null : value.getLongValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.NUMERIC)) {
+            return value.isNull() ? null : value.getNumericValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.TIME)) {
+            return value.isNull() ? null : value.getStringValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.TIMESTAMP)) {
+            return value.isNull() ? null : value.getTimestampValue();
+        } else if (legacySQLTypeName.equals(LegacySQLTypeName.BYTES)) {
+            return value.isNull() ? null : value.getBytesValue();
+        } else {
+            // Return a simple object
+            logger.warn("legacySQLType {} not recognized", legacySQLTypeName);
+            return value.isNull() ? null : value.getValue().toString();
+        }
     }
 
     /**
