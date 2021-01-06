@@ -124,6 +124,13 @@ public class SnapshotCreateFlight extends Flight {
             resourceService,
             snapshotName));
 
+        // Index the snapshot data into Elasticsearch
+        addStep(new IndexDataStep(
+            snapshotService,
+            snapshotReq,
+            bigQueryPdao,
+            userReq));
+
        // unlock the snapshot metadata row
         addStep(new UnlockSnapshotStep(snapshotDao, null));
     }
